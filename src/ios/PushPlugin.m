@@ -67,7 +67,7 @@
             }
         }
 
-        [self registerWithToken:registrationToken];
+        [self registerWithToken:registrationToken APNS:false];
     } else {
         NSLog(@"FCM token is null");
     }
@@ -418,9 +418,8 @@
     [results setValue:dev.model forKey:@"deviceModel"];
     [results setValue:dev.systemVersion forKey:@"deviceSystemVersion"];
 
-    if(![self usesFCM]) {
-        [self registerWithToken: token];
-    }
+    [self registerWithToken: token APNS:true];
+
 #endif
 }
 
@@ -560,11 +559,11 @@
     }
 }
 
--(void)registerWithToken:(NSString*)token; {
+-(void)registerWithToken:(NSString*)token APNS:(BOOL *)isAPNS; {
     // Send result to trigger 'registration' event but keep callback
     NSMutableDictionary* message = [NSMutableDictionary dictionaryWithCapacity:2];
     [message setObject:token forKey:@"registrationId"];
-    if ([self usesFCM]) {
+    if ([self usesFCM] && !isAPNS) {
       [message setObject:@"FCM" forKey:@"registrationType"];
     } else {
       [message setObject:@"APNS" forKey:@"registrationType"];
@@ -635,7 +634,7 @@
                         ntohl(tokenBytes[3]), ntohl(tokenBytes[4]), ntohl(tokenBytes[5]),
                         ntohl(tokenBytes[6]), ntohl(tokenBytes[7])];
 
-    [self registerWithToken:sToken];
+    [self registerWithToken:sToken APNS:false];
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
